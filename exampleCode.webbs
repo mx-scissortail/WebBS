@@ -69,7 +69,7 @@ numberAndIfElseDemo: fn () void {
 	i |>| c	// Unsigned comparison.
 	
 	// WebBS has pretty much all the numeric operators from WebAssembly.
-	// You can find a whole list here: https://j-s-n.github.io/webbs/compiler/operatorTable.js
+	// You can find a whole list here: https://j-s-n.github.io/WebBS/compiler/operatorTable.js
 	
 	// Any numeric type can be used as the condition for an "if"; zero is the only falsy value.
 	if (long_f) {log(1)} else {log(2)}

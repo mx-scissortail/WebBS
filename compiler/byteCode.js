@@ -6,9 +6,9 @@
     2. Utility functions and constants, mostly for numeric encoding
     3. The codeTable used by ByteCodeContainer.byte to allow specifying things like opcodes via string descriptors
 */
-import {VOID} from "./syntax.js";
-import {CompileError} from "./compileError.js";
-import {generate} from "./functionCodeGen.js";
+import {VOID} from "/WebBS/compiler/syntax.js";
+import {CompileError} from "/WebBS/compiler/compileError.js";
+import {generate} from "/WebBS/compiler/functionCodeGen.js";
 
 
 /*

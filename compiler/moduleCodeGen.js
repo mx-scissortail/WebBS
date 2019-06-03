@@ -1,4 +1,4 @@
-import {ByteCodeContainer} from "./byteCode.js";
+import {ByteCodeContainer} from "/WebBS/compiler/byteCode.js";
 
 
 /*
