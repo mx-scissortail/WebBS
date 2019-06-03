@@ -1,6 +1,6 @@
 # WebBS
 
-__WebBS__ (short for "__Web__Assembly __B__etter __S__yntax") is a simple byte-twiddling language that compiles to WebAssembly bytecode.
+__WebBS__ (short for "(Web)Assembly (B)etter (S)yntax") is a simple byte-twiddling language that compiles to WebAssembly bytecode.
 
 It features:
 * Simple, structured syntax with block scope
@@ -18,11 +18,11 @@ The editor GUI allows the user to write and run simple __WebBS__ programs, and v
 
 If you want to write your own lightweight DSL that runs on the front end, __WebBS__ wouldn't be a terrible place to start (and in fact, it was initially created as the first steps toward exactly that).
 
-To get a sense of the syntax of the language, check out some [example code](http://j-s-n.github.io/webbs/index.html#splash) in the editor.
+To get a sense of the syntax of the language, check out some [example code](http://j-s-n.github.io/WebBS/index.html#splash) in the editor.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgements
 
