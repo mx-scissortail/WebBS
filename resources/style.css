@@ -1,0 +1,449 @@
+/*
+  Credit to http://laemeur.sdf.org/fonts/ for the More Perfect DOS VGA font used here.
+*/
+@font-face {
+  font-family: "IBM-VGA9";
+  src: url(./MorePerfectDOSVGA.ttf) format("truetype");
+}
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --disabled-bg: #394048;
+  --disabled-fg: #61666d;
+  --editor-bg: #2c3643;
+  --editor-fg: #dbe6ec;
+  --em: #ffffff;
+  --error: #ff0000;
+  --selection-bg: rgba(54, 32, 92, 0.996);
+  --shadow: #000000;
+  --success: #559f7a;
+  --tab-bg: #4c5259;
+  --tab-fg: #b7babd;
+  --token-default: var(--editor-fg);
+  --token-type: #288ad6;
+  --token-bad-token: #ff0000;
+  --token-paren: #8abee5;
+  --token-block: #35a2c5;
+  --token-keyword: #ff708e;
+  --token-fn: #46bfc0;
+  --token-address: #ddaadd;
+  --token-literal: #e0c85d;
+  --token-operator: #16c98d;
+  --token-ignore: #67747c;
+  --toolbar-bg: #262e37;
+}
+
+body {
+  display: flex;
+  flex-direction: row;
+  font-family: "IBM-VGA9";
+  font-size: 16px;
+  line-height: 16px;
+  margin: 0;
+  padding: 0;
+  tab-size: 2;
+  -moz-tab-size: 2;
+}
+
+::selection {
+  background-color: var(--selection-bg);
+}
+
+
+/*
+  Editor Area
+*/
+
+#editor {
+  background-color: var(--editor-bg);
+  caret-color: var(--em);
+  color: var(--editor-fg);
+  height: 100vh;
+  outline: none;
+  overflow: auto;
+  padding: 1ch;
+  width: 50vw;
+}
+
+#editor>span {
+  white-space: pre;
+}
+
+#editor>.error {
+  position: relative;
+  text-decoration: var(--error) underline;
+  text-decoration-skip-ink: none;
+}
+
+#editor.show-referent-0>.referent-0::after,
+#editor.show-referent-1>.referent-1::after {
+  background-color: var(--error);
+  color: var(--em);
+  display: block;
+  left: 0;
+  padding: 0 0.5ch;
+  position: absolute;
+  top: calc(100% + 8px);
+  z-index: 1;
+}
+
+#editor.show-referent-0>.referent-0::after {
+  content: "1";
+}
+
+#editor.show-referent-1>.referent-1::after {
+  content: "2";
+}
+
+#editor.show-referent-0>.referent-0::before,
+#editor.show-referent-1>.referent-1::before { 
+	border: solid transparent;
+	border-color: rgba(0, 0, 0, 0);
+  border-bottom-color: var(--error);
+	border-width: 9px;
+	bottom: -8px;
+	content: " ";
+	height: 0;
+	left: 1ch;
+  margin-left: -9px;
+	pointer-events: none;
+	position: absolute;
+	width: 0;
+  z-index: 1;
+}
+
+
+/*
+  Right Panel Area
+*/
+
+#panel {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;  
+  width: 50vw;
+}
+
+#panel>.toolbar {
+  align-items: flex-end;
+  background-color: var(--toolbar-bg);
+  display: flex;
+  flex-direction: row;
+}
+
+#panel>.toolbar>.tab-container {
+  display: flex;
+  margin-left: 1ch;
+  overflow: hidden;
+}
+
+#panel>.toolbar>.tab-container>.tab {
+  background-color: var(--disabled-bg);
+  color: var(--tab-fg);
+  cursor: pointer;
+  padding: 1ch 2ch;
+  user-select: none;
+  -moz-user-select: none;
+  white-space: pre;
+}
+
+#panel>.toolbar>.tab-container>.tab.disabled {
+  color: var(--disabled-fg);
+  cursor: default;
+}
+
+#panel>.toolbar>.tab-container>.tab:not(.disabled):hover {
+  color: var(--em);
+}
+
+#panel[data-selected="status"] #status-tab,
+#panel[data-selected="output"] #output-tab,
+#panel[data-selected="parse-tree"] #parse-tree-tab,
+#panel[data-selected="bytecode"] #bytecode-tab,
+#panel[data-selected="about"] #about-tab {
+  background-color: var(--tab-bg);
+  color: var(--em);
+}
+
+#panel[data-selected="status"] #status,
+#panel[data-selected="output"] #output,
+#panel[data-selected="parse-tree"] #parse-tree,
+#panel[data-selected="bytecode"] #bytecode,
+#panel[data-selected="about"] #about {
+  display: block;
+}
+
+#panel>.content-container {
+  background-color: var(--tab-bg);
+  color: var(--tab-fg);
+  flex-grow: 1;
+  overflow: auto;
+}
+
+#panel>.content-container>.content {
+  display: none;
+  min-height: 100%;
+  min-width: 100%;
+  padding: 1ch;
+  position: relative;
+}
+
+#panel>.content-container>.content em {
+  color: var(--em);
+  font-style: normal;
+}
+
+
+/*
+  Status Tab
+*/
+
+#status .ref {
+  display: inline-block;
+}
+
+#status .ref>.tag {
+  color: var(--error);
+  cursor: pointer;
+}
+
+#status .ref:hover>.tag {
+  background-color: var(--error);
+  color: var(--em);
+}
+
+#status-message {
+  margin-top: 1rem;
+  white-space: pre-wrap;
+}
+
+#status-title.error {
+  color: var(--error);
+}
+
+#status-title.success {
+  color: var(--success);
+}
+
+
+/*
+  Run Tab
+*/
+
+#run-message.hidden {
+  display: none;
+}
+
+
+/*
+  Parse Tree Tab
+*/
+
+#parse-tree .ast-node {
+  align-items: stretch;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1ch;
+}
+
+#parse-tree .ast-node>.node-info {
+  background-color: var(--editor-bg);
+  box-shadow: 4px 4px 0 var(--shadow);
+  margin-left: 1ch;
+  padding-left: 1ch;
+  padding-right: 1ch;
+}
+
+#parse-tree .ast-node>.node-info.type {
+  border-top: 4px solid  var(--token-type);
+}
+
+#parse-tree .ast-node>.node-info.bad-token {
+  border-top: 4px solid  var(--bad-token);
+}
+
+#parse-tree .ast-node>.node-info.paren {
+  border-top: 4px solid  var(--token-paren);
+}
+
+#parse-tree .ast-node>.node-info.block {
+  border-top: 4px solid  var(--token-block);
+}
+
+#parse-tree .ast-node>.node-info.keyword {
+  border-top: 4px solid  var(--token-keyword);
+}
+
+#parse-tree .ast-node>.node-info.fn {
+  border-top: 4px solid  var(--token-fn);
+}
+
+#parse-tree .ast-node>.node-info.address {
+  border-top: 4px solid  var(--token-address);
+}
+
+#parse-tree .ast-node>.node-info.literal {
+  border-top: 4px solid  var(--token-literal);
+}
+
+#parse-tree .ast-node>.node-info.operator {
+  border-top: 4px solid  var(--token-operator);
+}
+
+#parse-tree .ast-node>.node-info.ignore {
+  border-top: 4px solid  var(--token-ignore);
+}
+
+#parse-tree .ast-node>.node-info.default {
+  border-top: 4px solid  var(--token-default);
+}
+
+
+/*
+  Bytecode Tab
+*/
+
+#bytecode {
+  white-space: pre;
+}
+
+#bytecode > div > span.bytes {
+  color: var(--em);
+}
+
+#bytecode > div > span.annotation {
+  opacity: 0.5;
+}
+
+
+/*
+  About Tab
+*/
+
+#about {
+  white-space: pre-wrap;
+}
+
+#about a {
+  color: var(--em);
+}
+
+#about a:visited {
+  color: var(--em);
+}
+
+
+/*
+  Splash Message
+*/
+
+#splash {
+  background-color: var(--token-type);
+  color: var(--em);
+  height: min-content;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  white-space: pre;
+  width: min-content;
+}
+
+#splash.hidden {
+  display: none;
+}
+
+#splash-button {
+  background-color: var(--token-keyword);
+  position: absolute;
+}
+
+#splash-button:hover {
+  background-color: var(--token-address);
+}
+
+
+/*
+  Buttons
+*/
+
+.button {
+  background: var(--token-type);
+  box-shadow: 1ch 1ch 0 var(--shadow);
+  color: var(--em);
+  cursor: pointer;
+  display: inline-block;
+  margin: 1ch 1ch 1rem 1ch;
+  padding: 1px 2ch;
+  user-select: none;
+  -moz-user-select: none;
+}
+
+.button.disabled {
+  background-color: var(--disabled-bg);
+  color: var(--disabled-fg);
+  pointer-events: none;
+}
+
+.button:hover {
+  background:var(--token-fn);
+}
+
+.button:active {
+  box-shadow: none;
+  transform: translate(1ch, 1ch);
+}
+
+
+/*
+  Syntax Highlighting (used in both the editor and the panel)
+*/
+
+.default {
+  color: var(--token-default);
+}
+
+.type {
+  color: var(--token-type);
+}
+
+.bad-token {
+  color: var(--bad-token);
+}
+
+.paren {
+  color: var(--token-paren);
+}
+
+.block {
+  color: var(--token-block);
+}
+
+.keyword {
+  color: var(--token-keyword);
+}
+
+.fn {
+  color: var(--token-fn);
+}
+
+.address {
+  color: var(--token-address);
+}
+
+.literal {
+  color: var(--token-literal);
+}
+
+.operator {
+  color: var(--token-operator);
+}
+
+.ignore {
+  color: var(--token-ignore);
+}
+

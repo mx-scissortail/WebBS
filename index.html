@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>WebBS</title>
+      <meta charset="UTF-8" />
+      <link rel="icon" href="./resources/favicon.ico" type="image/x-icon">
+      <link rel="stylesheet" type="text/css" href="./resources/style.css">
+    </head>
+    <body>
+      <div id="editor" contenteditable="true" spellcheck="false"></div>
+      <div id="panel" data-selected="about">
+        <div class="toolbar">
+          <div id="build-button" class="button">Build</div>
+          <div id="run-button" class="button disabled">Run</div>          
+          <div class="tab-container">
+            <div id="status-tab" class="tab">Status</div>
+            <div id="output-tab" class="tab disabled">Output</div>
+            <div id="parse-tree-tab" class="tab disabled">AST</div>
+            <div id="bytecode-tab" class="tab disabled">Bytecode</div>
+            <div id="about-tab" class="tab">About</div>
+          </div>
+        </div>
+        <div class="content-container">
+          <div id="status" class="content">
+            <div><em>BUILD STATUS: </em><span id="status-title">n/a</span></div>
+            <div id="status-message">Press the "Build" button to compile.</div>
+          </div>
+          <div id="output" class="content">
+            <span id="run-message">Press the "Run" button to run the compiled <em>WebBS</em> program.</span>
+            <div id="log"></div>
+          </div>
+          <div id="parse-tree" class="content"></div>
+          <div id="bytecode" class="content"></div>
+          <div id="about" class="content"><em>WebBS</em> (short for "<em>Web</em>Assembly <em>B</em>etter <em>S</em>yntax") is a simple byte-twiddling language that compiles to WebAssembly bytecode.
+
+It features:
+* Simple, structured syntax with block scope
+* Infixed math expressions with operator precedence
+* Typed pointers and function pointers
+* Immutable local variables
+* Minor type coersion / syntax sugar
+* Not much else
+
+<em>WebBS</em> isn't intended to be particularly useful on its own - it's a toy language. Rather, it's intended to be an educational tool for learning about WebAssembly and compiler design.
+
+The <em>WebBS</em> code contains an extremely simple compiler, written in pure Javascript, which runs entirely on the front end. The <em>WebBS</em> compiler has zero external dependencies and no build or bundling steps, and the whole thing (including this GUI) is a few hundred lines of well-commented code. It has a very simple architecture and it translates <em>WebBS</em> code into WebAssembly bytecode in pretty much the most straightforward possible way, with (almost) no optimization or code restructuring. It's written to be very easy to understand and modify, so programmers (especially Javascript programmers) who are interested in learning more about how compilers work can dig right in by viewing the source (either directly, or <a href="https://github.com/j-s-n/webbs">on GitHub</a>).
+
+This editor GUI allows the user to write and run simple <em>WebBS</em> programs, and view the compiler's output either as an abstract syntax tree or as annotated(!) WebAssembly bytecode, so interested programmers can get a sense of how <em>WebBS</em> expressions are parsed and translated into the stack-machine-like WebAssembly bytecode without even reading the source.
+
+If you want to write your own lightweight DSL that runs on the front end, <em>WebBS</em> wouldn't be a terrible place to start (and in fact, it was initially created as the first steps toward exactly that).
+
+To get a sense of the syntax of the language, check out some <a href="./index.html#exampleCode" target="_blank">example code</a>.
+
+- JSN</div>
+        </div>
+      </div>
+      <script type="module">
+        import {Editor} from "./editor/editor.js";
+        
+        if (window.location.hash === "#splash") {
+          let splash = document.getElementById("splash");
+          splash.classList.remove("hidden");
+          document.getElementById("splash-button").addEventListener("mousedown", () => splash.classList.add("hidden"));
+        }
+
+        if (window.location.hash === "#exampleCode" || window.location.hash === "#splash") {
+          fetch("/exampleCode.webbs").then((response) => response.text()).then((text) => new Editor(text));
+        } else {
+          new Editor();
+        }
+      </script>
+<div id="splash" class="hidden">╔════════════════════════════════════════════════╗
+║      __                               __       ║
+║     /_/\         Welcome To          / /\      ║
+║     \ \ \                   ____    / / /_     ║
+║   __ \ \ \   ____  __      / /  \  /_/ / /\    ║
+║  /_/\ \ \ \ / /  \/_/\____/_/ /\ || | / /  \   ║
+║  \ \ \_\_\ /_/ /\ \ \ \/  \ \ \/  |_| \/ /\ |  ║
+║   \ \ \|  _\ \ \///\ \  /\ \ \  /\ \ \  / / |  ║
+║    \ \   |  \ \  V /\ \ \/ /\ \ \/ /\_\/ / /   ║
+║     \ \  |   \_\__/  \_\__/  \ \  /   /_/ /    ║
+║      \_\/                     \_\/    \_\/     ║
+║                                                ║
+║     A toy programming language for the WEB     ║
+║    The WebBS editor is READ ONLY on MOBILE!    ║
+║                                                ║
+║                  <div class="button" id="splash-button">Okay</div>                              ║
+║                                                ║
+║                                                ║
+╚════════════════════════════════════════════════╝</div>
+    </body>
+</html>

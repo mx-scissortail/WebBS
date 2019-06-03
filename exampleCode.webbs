@@ -1,0 +1,164 @@
+// This editor GUI makes some imports available by default.
+// Open the browser console if you want to mess around with these.
+import log: fn (i32) void from "WebBS/log"
+import logStr: fn (i32, i32) void from "WebBS/logStr"
+import default_memory 64 void from "WebBS/memory"
+
+
+foo: i32 = 0	// Declare a global 32-bit integer variable named "foo", and initialize it to 0.
+bar: immutable f32 = 42.0	// This one is an immutable 32-bit float.
+
+
+// This is a function that takes two 32-bit integers and returns another.
+add: fn (a: i32, b: i32) i32 {
+	a + b	// Blocks (including function bodies) can implicitly return their last expression.
+}
+// But "return a + b" would work just as well.
+
+doubleMax: fn (a: i32, b: i32) i32 {
+	2 * if (a > b) {a} else {b}	// If/else structures can be used as expressions too.
+}
+
+
+export doubleMax	// Exporting things is easy.
+export add as "plus" // You can rename exports if you need to.
+
+
+loopDemo: fn () void {
+	i: i32	// All values are implicitly initialized to zero.
+	
+	// There aren't while/do-while/for loops in WebBS, just this very general "loop" structure.
+	loop {
+		if (i >= 10) break	// Loops must be explicitly broken out of.
+		i++
+	}
+	
+	// Here are a couple more concise ways to write the same thing.
+	loop if (i >= 10) break else {i++}
+	loop if (i < 10) {i++} else break
+	
+	i = 0;
+	// Loops can be used as expressions that return a value with the "yield" keyword.
+	x: i32 = 2 * loop if (i < 10) {i++} else {
+		yield i
+	}
+	
+	// Loops with no exit points are caught by the compiler, so this won't compile:
+	// loop {i = i + 1}
+	
+	// "continue" and "return" work pretty much like you'd expect them to.
+}
+
+
+numberAndIfElseDemo: fn () void {
+	i: i32 = 10	// Numeric integer literals are 32-bit integers by default.
+	f: f32 = 10.0	// Floating point literals are 32-bit floats by default.
+	
+	// In both cases, you can add an "x32" suffix to be explicit.
+	i = 10x32
+	f = 10.0x32
+	
+	long_i: i64 = 10x64	// The "x64" suffix creates a 64-bit integer.
+	long_f: f64 = 10.0x64	// Same with 64-bit floats.
+	
+	c: i32 = -100	// Integers are treated as signed by default.
+	
+	// Like WebAssembly, there are special operators for treating integers as unsigned.
+	// The convention is that unsigned operators are surrounded by |s.
+	i > c // Signed comparison.
+	i |>| c	// Unsigned comparison.
+	
+	// WebBS has pretty much all the numeric operators from WebAssembly.
+	// You can find a whole list here: https://j-s-n.github.io/webbs/compiler/operatorTable.js
+	
+	// Any numeric type can be used as the condition for an "if"; zero is the only falsy value.
+	if (long_f) {log(1)} else {log(2)}
+	
+	// Chained if/else if/else works as you'd expect.
+	
+	if (i | c) {log(1)}	// This is bitwise "or".
+	if (i or c) {log(2)}	// This is logical, short-circuiting "or".
+	if (i & c) {log(1)}	// This is bitwise "and".
+	if (i and c) {log(2)}	// This is logical, short-circuiting "and".
+}
+
+
+ptrDemo: fn () void {
+	// Remember this line at the beginning of the file?
+	// 	import default_memory 64 void from "WebBS/memory"
+	// That imported a 64-page WebAssembly memory (with no maximum size).
+	// You could also define a similar memory locally with a line like this:
+	//	default_memory 64 void
+	// Or, a memory with a limited capacity for growth, like this:
+	//	default_memory 64 128
+	
+	// Memory is accessed and mutated via pointers.
+	// WebBS pointers work a lot like array pointers in C.
+	
+	// This creates a pointer that can be used to get/set i32 values.
+	p: ptr i32 = 10	// Initialize the pointer with an address of "10".
+	
+	// Pointers know the size of the data type that they point to.
+	// i32s require 4 bytes for storage, so p actually points to a byte offset of 40.
+
+	log(p) // Prints "10" because naked references to pointers yield their address.
+	
+	// To get at the value that p points to, we use an access address offset.
+	// An offset of 0 accesses the location that p points to.
+	log(p[0])	// Prints "0" because the default memory is zeroed on allocation.
+	p[0] = 14	// Let's store a 32-bit value at the location p points to (bytes 40 to 43).
+	log(p[0])	// Now this prints "14".
+	
+	p[1] = 60	// An offset of 1 points at the next 32-bit slot (bytes 44-47).
+	// In general, if p: ptr TYPE = BASE then p[OFFSET] points to (BASE + OFFSET) * sizeof TYPE.
+	// So memory access through pointers is aligned to the storage type size by default.
+	
+	// If you want unaligned access, you can add a second parameter to the address offset.
+	// If p: ptr TYPE = BASE then p[OFFSET; ALIGN] points to (BASE + OFFSET) * sizeof TYPE + ALIGN.
+	p[1; 2] = 82 // So this shifts the access over 2 bytes (bytes 46-49).
+	// This is likely much slower than aligned access.
+	
+	// You can have a pointer to any numeric variable type, e.g. i32, i64, f32, f64.
+	// But pointer storage types are slightly more general than numeric variable types.
+	// Numeric variables only have 32 and 64 bit sizes; pointers can target smaller chunks of memory.
+	
+	// This is a pointer you can use to load a single byte from memory:
+	q: ptr i32_u8 = 0 // That byte is zero-extended into a 32 bit integer.
+	q[0] = 64;	// Writing to that location will only write the least 8 bits of the value.
+	
+	r: ptr i32_s8 = 0	// This is the same deal, but reads are sign-extended.
+	// This works for i32 <-> 8/16 byte lengths, and i64 <-> 8/16/32 byte lengths.
+}
+
+
+// Dynamic dispatch and the like are supported via dynamic function tables.
+default_table 16 void	// This declares a function table with 16 slots and no maximum size.
+
+fnPtrDemo: fn () void {
+	// In order to call a function in the function table, you need a typed function pointer.
+	f: fn_ptr (i32, i32) i32 = 0	// "0" is the index into the table defined above.
+
+	f(10, 15)	// You can call function pointers like normal functions.
+	
+	f = f + 10;	// But you can also do arithmetic with them (they're just i32s with metadata).
+	
+	// Due to some WebAssembly MVP limitations, tables can currently only be mutated from JS.
+}
+
+
+// A function with this name and signature will be executed when the module is instantiated.
+main: fn () void {
+	// Let's write a string to the shared memory we imported.
+	// ... WebBS doesn't have a string type, soooooo ...	
+	p: ptr i32 = 0
+	p[0] = 1819043144	// "Hell"
+	p[1] = 1461726319	// "o, W"
+	p[2] = 1684828783	// "orld"
+	p[3] = 33 				// "!"
+	logStr(p, 13)	// p points to the string "Hello, World!", which is 13 ASCII characters long.
+}
+
+// That's pretty much the whole language.
+
+
+
