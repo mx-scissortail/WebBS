@@ -64,7 +64,7 @@ To get a sense of the syntax of the language, check out some <a href="./index.ht
         }
 
         if (window.location.hash === "#exampleCode" || window.location.hash === "#splash") {
-          fetch("/exampleCode.webbs").then((response) => response.text()).then((text) => new Editor(text));
+          fetch("/WebBS/exampleCode.webbs").then((response) => response.text()).then((text) => new Editor(text));
         } else {
           new Editor();
         }
