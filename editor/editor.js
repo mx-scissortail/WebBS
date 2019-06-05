@@ -298,7 +298,23 @@ export class Editor {
     Everything else we either handle in some custom way, or ignore.
   */
   keyDown (event) {
-    if (navKeys.includes(event.key) || (event.ctrlKey && ignoredCtrlKeys.includes(event.key))) return;
+    if (navKeys.includes(event.key) || event.ctrlKey || event.metaKey) {
+      // Intercept and replace undo/redo with our custom versions, otherwise let nav keys and ctrl/command shortcuts go through.
+      if (event.key === "z") {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.shiftKey && event.metaKey) {
+          this.redo();
+        } else {
+          this.undo();
+        }
+      } else if (event.key === "y") {
+        event.preventDefault();
+        event.stopPropagation();
+        this.redo();
+      }
+      return;
+    }
 
     // Don't let keypresses actually go through to the editor - we manage their effects manually.
     event.preventDefault();
@@ -337,14 +353,6 @@ export class Editor {
         insert = "\t";
       } break;
 
-      case "z": { // Trigger our custom undo.
-        if (event.ctrlKey) return this.undo();
-      } break;
-
-      case "y": { // Trigger our custom redo.
-        if (event.ctrlKey) return this.redo();
-      } break;
-      
       case "{": { // If text is selected, we wrap it with {}, rather than replacing it.
         if (!isCollapsed) return this.wrapText(start, end, "{", "}");
       } break;
@@ -353,7 +361,7 @@ export class Editor {
         if (this.text[start - 1] === "\t") {
           start -= 1;
         }
-      }
+      } break;
 
       case "(": { // If text is selected, we wrap it with (), rather than replacing it.
         if (!isCollapsed) return this.wrapText(start, end, "(", ")");
@@ -622,7 +630,6 @@ const allNewLineTabs = /\n\t/g;
 const initialWhiteSpace = /^\s+/;
 const initialCloseParen = / *}/y;
 const navKeys = ["Home", "End", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Insert"];
-const ignoredCtrlKeys = ["a", "c", "x", "v"];
 const HTMLEscapeReplacements = {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#x27;", "/": "&#x2F;"};
 const HTMLCharsToEscape = /[&<>"'\/]/g;
 
