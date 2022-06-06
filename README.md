@@ -18,7 +18,7 @@ The editor GUI allows the user to write and run simple __WebBS__ programs, and v
 
 If you want to write your own lightweight DSL that runs on the front end, __WebBS__ wouldn't be a terrible place to start (and in fact, it was initially created as the first steps toward exactly that).
 
-To get a sense of the syntax of the language, check out some [example code](http://j-s-n.github.io/WebBS/index.html#splash) in the editor.
+To get a sense of the syntax of the language, check out some [example code](http://mx-scissortail.github.io/WebBS/index.html#splash) in the editor.
 
 ## License
 
